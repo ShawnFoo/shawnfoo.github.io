@@ -78,6 +78,7 @@ theme:              yilia
 deploy:
   type:             git
   repo:             https://github.com/ShawnFoo/shawnfoo.github.io
+  branch:           master
 
 jsonContent:
   meta:             false
