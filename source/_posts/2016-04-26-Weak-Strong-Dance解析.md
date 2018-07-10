@@ -1,8 +1,13 @@
 ---
 title: Weak-Strong Dance解析
 date: 2016-04-26
-tags: [iOS, block, 2016]
-categories: [小结]
+categories: 
+- 小结 
+- iOS
+- 2016
+tags: 
+- block
+- 修饰符
 ---
 我们在使用Block时常常看到`Weak-Strong Dance`的用法, 很多的文章以及[官方文档](https://developer.apple.com/library/mac/releasenotes/ObjectiveC/RN-TransitioningToARC/Introduction/Introduction.html#//apple_ref/doc/uid/TP40011226-CH1-SW4)都举例了这样做的原因. 但是还尚未发现有对strong进行讲解的. 下面就举个栗子具体分析下**为什么加strong**以及**何时起作用**
 
