@@ -48,7 +48,7 @@ tags:
 
 弹幕设置
 
-```
+``` objc
 // Configuration
 FXDanmakuConfiguration *config = [FXDanmakuConfiguration defaultConfiguration];
 config.rowHeight = [DemoDanmakuItem itemHeight];
@@ -69,7 +69,7 @@ self.danmaku.delegate = self;
 
 数据添加
 
-```
+```objc
 // add data for danmaku view to present
 DemoDanmakuItemData *data = [DemoDanmakuItemData data];
 [self.danmaku addData:data];
@@ -82,7 +82,7 @@ if (!self.danmaku.isRunning) {
 
 代理事件
 
-```
+```objc
 - (void)danmaku:(FXDanmaku *)danmaku didClickItem:(FXDanmakuItem *)item withData:(DemoDanmakuItemData *)data {
     // 此处 处理点击
 }
@@ -114,7 +114,7 @@ if (!self.danmaku.isRunning) {
 
 *iOS8+*
 
-```
+```objc
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
     [self.danmaku pause];
     [self.danmaku cleanScreen];
@@ -129,7 +129,7 @@ if (!self.danmaku.isRunning) {
 
 *系统版本小于iOS8*
 
-```
+```objc
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
     [self.danmaku pause];
     [self.danmaku cleanScreen];
