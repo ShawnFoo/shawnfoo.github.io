@@ -21,16 +21,16 @@ tags:
 #### 一、weak的作用(代码+注解 简单跳过)
 防止被block捕获(会导致引用计数加1), 打破循环引用(retain cycle)
 
-```
+```objc
 // DeallocMonitor继承NSObject, 仅重写其dealloc方法, 并在其中打印其被释放日志
 DeallocMonitor *object1 = [DeallocMonitor new];
 DeallocMonitor *object2 = [DeallocMonitor new];
 @WeakObj(object2);//__weak typeof(object2) weakobject2 = object2;
 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
-        // object1被block捕获, 引用计数加1, 外部作用域结束时仍未被释放, 直至该Block执行完毕才被释放
-        NSLog(@"5s已到, %@该被释放勒", object1);
-        // weakobject2被weak 修饰, 其指向的object2对象的引用计数不会增加, 当外部作用域结束时就已被释放
-        NSLog(@"5s已到, %@早已被释放, 此处为null", weakobject2);
+	// object1被block捕获, 引用计数加1, 外部作用域结束时仍未被释放, 直至该Block执行完毕才被释放
+	NSLog(@"5s已到, %@该被释放勒", object1);
+	// weakobject2被weak 修饰, 其指向的object2对象的引用计数不会增加, 当外部作用域结束时就已被释放
+	NSLog(@"5s已到, %@早已被释放, 此处为null", weakobject2);
 });
 // 外部作用域结束
 ```
@@ -44,18 +44,18 @@ dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), di
 
 下面这段代码就是在block中用strong申明的对象强引用一次weakObject, 但修饰对象在block执行前就已经被释放的栗子
 
-```
+```objc
 // DeallocMonitor继承NSObject, 仅重写其dealloc方法, 并在其中打印其被释放日志
 DeallocMonitor *object = [DeallocMonitor new];
 @WeakObj(object);// weakobject
 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
-        // 该strongObj的申明仅在block执行时才见效, 而外部作用域一结束object就已经被释放了, 所以然并卵
-       @StrongObj(object);
-        /* weakobject用 weak修饰, 故其引用计数不变, 
-          上边的宏本意是申明一个新的object局域变量对weakobject指向的原object进行强引用..
-          按理 原object引用计数应该会加1, 可是它还没等到被强引用时就已经挂掉了
-        */
-        NSLog(@"5s已到, %@然后早已被释放, 此处为null", object);
+	// 该strongObj的申明仅在block执行时才见效, 而外部作用域一结束object就已经被释放了, 所以然并卵
+	@StrongObj(object);
+	/* weakobject用 weak修饰, 故其引用计数不变, 
+	上边的宏本意是申明一个新的object局域变量对weakobject指向的原object进行强引用..
+	按理 原object引用计数应该会加1, 可是它还没等到被强引用时就已经挂掉了
+	*/
+	NSLog(@"5s已到, %@然后早已被释放, 此处为null", object);
 });
 // 外部作用域结束
 ```
@@ -63,21 +63,21 @@ dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), di
 ##### 2.2 Block内部申明的强引用指针变量指向weakObject仅在block执行时才有效
 定义该Block的时strongObj宏还尚未使原对象引用计数加1! 那么strongObj宏生效时的表现是什么样子的呢? 继续上代码
 
-```
+```objc
 // 该段代码主要是打了一个时间差, 以模拟strong申明起作用的情形
 
 // DeallocMonitor继承NSObject, 仅重写其dealloc方法, 并在其中打印其被释放日志
 DeallocMonitor *object = [DeallocMonitor new];
 // 保证外部作用域结束的2.5秒(无限接近..)内object不会被释放
 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.5 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
-        NSLog(@"果断强引用object: %@\n 还能再多坚持2.5s", object);
+	NSLog(@"果断强引用object: %@\n 还能再多坚持2.5s", object);
 });
 @WeakObj(object);// weakobject
 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
-       @StrongObj(object);// __strong typeof(object) object = weakobject
-        sleep(3);// 卡个3s
-        // 此处就不会像上一段代码那样, 强引用一个为nil的object, 故weakobject指向的对象引用计数加1, 直到该block运行完, 才会被释放
-        NSLog(@"5s已到, %@打印完这个日志就飞升了", object);
+	@StrongObj(object);// __strong typeof(object) object = weakobject
+	sleep(3);// 卡个3s
+	// 此处就不会像上一段代码那样, 强引用一个为nil的object, 故weakobject指向的对象引用计数加1, 直到该block运行完, 才会被释放
+	NSLog(@"5s已到, %@打印完这个日志就飞升了", object);
 });
 // 外部作用域结束
 ```
@@ -85,16 +85,16 @@ dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), di
 ##### 2.3 有多少个嵌套block就应该申明多少对weak-strong
 假定我们在最外层block使用的一对weak-strong, 且外层block内还有一个block(没有用weak-strong)引用到了strongObj宏申明的局域变量object, 并假设原对象在外层block开始运行前一直存活, 这就会导致内层block捕获到局域变量object并使其指向对象的引用计数加1, 因为内层block捕获到了外层block中申明的object(强引用), 就跟外层block会捕获到外部强引用变量指向的对象一样一样的
 
-```
+```objc
 DeallocMonitor *object = [DeallocMonitor new];
 @WeakObj(object);
 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
-       @StrongObj(object);// 因为block运行时, weakObject指向对象依旧存在, 故该强引用使其引用计数加1
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
-            // 这一层block 发现上边的object是强引用, 导致捕获到其指向对象, 使其引用计数在该内层block尚未执行时就加1了
-            NSLog(@"打印完这个日志, %@才被释放", object);
-        });
-        NSLog(@"%@外层block结束, 引用计数减一", object);
+	@StrongObj(object);// 因为block运行时, weakObject指向对象依旧存在, 故该强引用使其引用计数加1
+	dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_global_queue(0, 0), ^{
+	    // 这一层block 发现上边的object是强引用, 导致捕获到其指向对象, 使其引用计数在该内层block尚未执行时就加1了
+	    NSLog(@"打印完这个日志, %@才被释放", object);
+	});
+	NSLog(@"%@外层block结束, 引用计数减一", object);
 });
 sleep(3);
 // 外部作用域所在线程小歇一会, 确保object存活3s, 作用域结束
