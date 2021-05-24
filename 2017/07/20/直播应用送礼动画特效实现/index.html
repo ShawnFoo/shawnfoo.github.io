@@ -16,16 +16,16 @@
 <meta property="og:site_name" content="ShawnFoo杂货屋">
 <meta property="og:description" content="送礼物作为观众打赏支持主播的一种方式, 也是直播应用的一大收入来源, 每个直播平台都包含送礼这一功能, 并且都把礼物动画效果做的特别炫酷. 如此的动画效果再搭配美女或帅哥主播的一句”谢谢某某某送的大飞机~”, 是不是想想都有点小激动, 感觉瞬间成为了全场的焦点?  本文主要叙述的就是大礼物动效的实现. 先放上按序列帧播放方案实现的动画引擎FXAnimationEngine, Demo中实现了直播间">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/303892-f80e156456491145.gif?imageMogr2/auto-orient/strip">
-<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/303892-50d4a2e2f732121e.gif?imageMogr2/auto-orient/strip">
-<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/303892-4f5e5d53e2332b59.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/303892-83ab4a87d1261201.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/303892-edef586a2d7a67d4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2021-05-13T06:46:03.454Z">
+<meta property="og:image" content="https://shawnfoo.github.io/2017/07/20/直播应用送礼动画特效实现/mhcb.gif">
+<meta property="og:image" content="https://shawnfoo.github.io/2017/07/20/直播应用送礼动画特效实现/angle.gif">
+<meta property="og:image" content="https://shawnfoo.github.io/2017/07/20/直播应用送礼动画特效实现/2_3_2_a.png">
+<meta property="og:image" content="https://shawnfoo.github.io/2017/07/20/直播应用送礼动画特效实现/4_1_2_a.png">
+<meta property="og:image" content="https://shawnfoo.github.io/2017/07/20/直播应用送礼动画特效实现/4_1_2_b.png">
+<meta property="og:updated_time" content="2021-05-24T16:20:26.288Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="直播应用送礼动画特效实现">
 <meta name="twitter:description" content="送礼物作为观众打赏支持主播的一种方式, 也是直播应用的一大收入来源, 每个直播平台都包含送礼这一功能, 并且都把礼物动画效果做的特别炫酷. 如此的动画效果再搭配美女或帅哥主播的一句”谢谢某某某送的大飞机~”, 是不是想想都有点小激动, 感觉瞬间成为了全场的焦点?  本文主要叙述的就是大礼物动效的实现. 先放上按序列帧播放方案实现的动画引擎FXAnimationEngine, Demo中实现了直播间">
-<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/303892-f80e156456491145.gif?imageMogr2/auto-orient/strip">
+<meta name="twitter:image" content="https://shawnfoo.github.io/2017/07/20/直播应用送礼动画特效实现/mhcb.gif">
   
   
     <link rel="icon" href="/favicon.ico">
@@ -198,8 +198,8 @@ var _hmt = _hmt || [];
 <p>先放上按序列帧播放方案实现的动画引擎<a href="https://github.com/ShawnFoo/FXAnimationEngine" target="_blank" rel="noopener">FXAnimationEngine</a>, Demo中实现了直播间礼物队列、礼物配置、礼物列表, 另外还分别用动画引擎与原生Core Animation去播放序列帧动画以做比较.</p>
 <a id="more"></a>
 <p>然后国际惯例, 上两张图</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/303892-f80e156456491145.gif?imageMogr2/auto-orient/strip" alt="梦幻城堡"></p>
-<p><img src="http://upload-images.jianshu.io/upload_images/303892-50d4a2e2f732121e.gif?imageMogr2/auto-orient/strip" alt="天使"></p>
+<p><img src="/2017/07/20/直播应用送礼动画特效实现/mhcb.gif" alt="梦幻城堡"></p>
+<p><img src="/2017/07/20/直播应用送礼动画特效实现/angle.gif" alt="天使"></p>
 <hr>
 <h2 id="一、直播应用礼物动画的常见方案"><a href="#一、直播应用礼物动画的常见方案" class="headerlink" title="一、直播应用礼物动画的常见方案"></a>一、直播应用礼物动画的常见方案</h2><p>仅个人了解, 实现iOS侧动画配置化常见方案有如下几种:</p>
 <table>
@@ -285,7 +285,7 @@ var _hmt = _hmt || [];
 <p>但我们可以通过CADisplayLink来实现该方案, 选CADisplayLink的原因是它比NSTimer精度要高很多, 正常情况下CADisplayLink的回调会在屏幕每次刷新时触发, 即一般1/60秒触发一次, 适合用于做UI的重绘, 因此可以通过它来周期性的替换关键帧图片, 从而达到播放动画的效果. 那么具体怎么做呢?</p>
 <p><strong>在CADisplayLink的回调中获取两次屏幕刷新的间隔时间, 通过不断的累加间隔时间来判断总的时间是否已经满足下一帧的播放时刻, 如果大于下一帧的播放时刻就可以替换为下一帧图片了, 直至最后一张关键帧也播放完成.</strong></p>
 <p>举个例子, 我们要在1秒内播放完一个含有5张关键帧图片的动画, 每张图片的停留时间、切换时间如下图2.3.2.a所示. 所以第0秒的时候就开始展示第一张关键帧, 直到1.0秒这一刻时, 动画播放结束.</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/303892-4f5e5d53e2332b59.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="图 2.3.2.a"></p>
+<p><img src="/2017/07/20/直播应用送礼动画特效实现/2_3_2_a.png" alt="图 2.3.2.a"></p>
 <p>此外, 如果还需要进一步优化, 我们可以加入图片异步解码、图片预加载逻辑等方案. </p>
 <ul>
 <li><p>异步图片解码, 图片解码是一项比较耗时、比较占CPU的操作, 对于未解码的图片, 系统一般会在主线程对其进行解码, 所以可以通过在异步线程进行图片强制解压缩, 从而不占用UI线程. 关于图片解码的详情, 强烈推荐<a href="http://www.cocoachina.com/ios/20170227/18784.html" target="_blank" rel="noopener">谈谈 iOS 中图片的解压缩</a>.</p>
@@ -323,9 +323,9 @@ var _hmt = _hmt || [];
 </table>
 <h4 id="4-1-2-资源更新流程"><a href="#4-1-2-资源更新流程" class="headerlink" title="4.1.2 资源更新流程"></a>4.1.2 资源更新流程</h4><p><strong>因对上家公司的代码保密, 此处不上具体代码</strong></p>
 <p>我们在上一小节中提及的两种更新方式, 它们主要的不同的就在于”资源更新”这一步骤</p>
-<p><em>图 4.1.2.a 整包更新的流程图</em><br><img src="http://upload-images.jianshu.io/upload_images/303892-83ab4a87d1261201.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="整包更新流程图.png"></p>
+<p><em>图 4.1.2.a 整包更新的流程图</em><br><img src="/2017/07/20/直播应用送礼动画特效实现/4_1_2_a.png" alt="整包更新流程图.png"></p>
 <p><em>图 4.1.2.b 增量更新的流程图</em></p>
-<p><img src="http://upload-images.jianshu.io/upload_images/303892-edef586a2d7a67d4.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="增量更新流程图.png"></p>
+<p><img src="/2017/07/20/直播应用送礼动画特效实现/4_1_2_b.png" alt="增量更新流程图.png"></p>
 <p>不知道各位发现两个流程共同之处没? 它们都需要检测资源版本号大小, 包括游戏补丁、热更补丁这一步骤都必不可少. 相比于补丁类的, 资源更新不用太考虑灰度发布、回滚机制等问题, 但还是依旧需要注意资源核对, 内部测试, 以及日志监控等保障, 我记得在前任公司就遇到了有的地区下载下来的资源包有问题, 所以不管是CDN的问题或资源本身有问题, 前端都需要为最坏的情况做好打算, 这才是万全之策.</p>
 <p>引用我上家公司, 我老大兼mentor, 达文哥, 告诫的一句箴言</p>
 <blockquote>
@@ -665,15 +665,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
                 </li>
               
                 <li class="article-tag-list-item">
-                  <a href="javascript:void(0)" class="js-tag color3">面试</a>
-                </li>
-              
-                <li class="article-tag-list-item">
                   <a href="javascript:void(0)" class="js-tag color4">CADisplayLink</a>
                 </li>
               
                 <li class="article-tag-list-item">
                   <a href="javascript:void(0)" class="js-tag color4">模块化</a>
+                </li>
+              
+                <li class="article-tag-list-item">
+                  <a href="javascript:void(0)" class="js-tag color3">面试</a>
                 </li>
               
             
